@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Validator;
+namespace App\Validator\Product;
 
-use App\DTO\ProductCollectionDTO;
 use App\Domain\Product\ProductInterface;
+use App\DTO\ProductCollectionDTO;
 use DomainException;
+use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 
-class ProductsCurrencyValidator
+#[AsTaggedItem('app.products_validator')]
+class ProductsCurrencyValidator implements ProductsValidatorInterface
 {
     /**
      * @throws DomainException
      */
-    public static function ensureSameCurrency(ProductCollectionDTO $productCollectionDTO): void
+    public function validate(ProductCollectionDTO $productCollectionDTO): void
     {
         $products = $productCollectionDTO->products;
         if ([] === $products) {

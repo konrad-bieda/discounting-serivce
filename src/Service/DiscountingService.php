@@ -2,9 +2,9 @@
 
 namespace App\Service;
 
-use App\DTO\ProductCollectionDTO;
 use App\Domain\Discount\DiscountInterface;
-use App\Validator\ProductsCurrencyValidator;
+use App\DTO\ProductCollectionDTO;
+use App\Validator\Product\ProductsValidatorInterface;
 use DomainException;
 
 final readonly class DiscountingService
@@ -12,8 +12,13 @@ final readonly class DiscountingService
     /** @var DiscountInterface[] */
     private array $discounts;
 
-    public function __construct(DiscountInterface ...$discounts)
-    {
+    /**
+     * @param iterable<ProductsValidatorInterface> $productsValidators
+     */
+    public function __construct(
+        public iterable $productsValidators,
+        DiscountInterface ...$discounts,
+    ) {
         $this->discounts = $discounts;
     }
 
@@ -22,7 +27,9 @@ final readonly class DiscountingService
      */
     public function applyDiscounts(ProductCollectionDTO $productCollectionDTO): int
     {
-        ProductsCurrencyValidator::ensureSameCurrency($productCollectionDTO);
+        foreach ($this->productsValidators as $validator) {
+            $validator->validate($productCollectionDTO);
+        }
 
         $total = 0;
         foreach ($productCollectionDTO->products as $product) {

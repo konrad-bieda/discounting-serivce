@@ -9,7 +9,7 @@ use App\Domain\Discount\PercentageDiscount;
 use App\Domain\Discount\VolumeDiscount;
 use App\Domain\Product\Product;
 use App\Service\DiscountingService;
-use DomainException;
+use App\Validator\Product\ProductsValidatorInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -19,25 +19,12 @@ class DiscountingServiceTest extends TestCase
     public function testApplyDiscounts(array $discounts, ProductCollectionDTO $products, int $expectedTotal): void
     {
         // Arrange
-        $service = new DiscountingService(...$discounts);
+        $validator = $this->createMock(ProductsValidatorInterface::class);
+        $validator->expects($this->once())->method('validate');
+        $service = new DiscountingService([$validator], ...$discounts);
 
         // Act & Assert
         $this->assertSame($expectedTotal, $service->applyDiscounts($products));
-    }
-
-    public function testApplyDiscountsWithDifferentCurrencyProductsShouldThrowException(): void
-    {
-        // Arrange
-        $service = new DiscountingService();
-
-        // Act & Assert
-        $this->expectException(DomainException::class);
-        $service->applyDiscounts(new ProductCollectionDTO(
-            ...[
-                new Product('code1', new Price(50, 'PLN'), 1),
-                new Product('code2', new Price(50, 'EUR'), 1),
-            ]
-        ));
     }
 
     public static function applyDiscountsProvider(): array

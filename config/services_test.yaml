@@ -1,0 +1,20 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Factory\:
+        resource: '../src/Factory/'
+        public: true
+
+    App\Service\:
+        resource: '../src/Service/'
+
+    App\Validator\:
+        resource: '../src/Validator/'
+
+    _instanceof:
+        App\Validator\Product\ProductsValidatorInterface:
+            tags: [ 'app.products_validator' ]
